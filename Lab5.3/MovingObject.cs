@@ -12,14 +12,18 @@ namespace Lab5._3
     {
         Random rnd;
 
+        public const int mutationChance = 75;
+
         public Point position;
         public double currentRotation;
         public int fitness = 0;
         public int movecounter = 0;
 
-        int distance = 15;
+        int distance;
 
         public List<Move> Moves = new List<Move>();
+        public List<int> collectedPoints = new List<int>();
+
 
         public delegate void Move();
 
@@ -50,7 +54,7 @@ namespace Lab5._3
         public List<Move> CreateGenes()
         {
             List<Move> movlist = new List<Move>();
-            int movescount = rnd.Next(25, 50);
+            int movescount = rnd.Next(25, 100);
             for(int i = 0; i<movescount; i++)
             {
                 int m = rnd.Next(3);
@@ -73,19 +77,104 @@ namespace Lab5._3
             return movlist;
         }
 
+        public void setMoves(List<Move> movlist)
+        {
+            this.Moves = movlist;
+        }
+
         public void ResetPos(Point pos, double curRot)
         {
             this.position = pos;
             this.currentRotation = curRot;
         }
 
-        public MovingObject(Point position, double currentRotation, Random rnd)
+        public MovingObject(Point position, double currentRotation, Random rnd, int distance)
         {
             this.rnd = rnd;
             this.position = position;
             this.currentRotation = 0;
             this.Moves = CreateGenes();
+            this.distance = distance;
             
+        }
+
+        public void Mutate()
+        {
+            for(int i = 0; i<Moves.Count;i++)
+            {
+                if(rnd.Next(100) > mutationChance)
+                {
+                    if (Moves[i] == MoveForward)
+                    {
+                        if (rnd.Next(2) == 0) Moves[i] = RotateLeft;
+                        else Moves[i] = RotateRight;
+                    }
+                    else if (Moves[i] == RotateLeft)
+                    {
+                        if (rnd.Next(2) == 0) Moves[i] = MoveForward;
+                        else Moves[i] = RotateRight;
+                    }
+                    else
+                    {
+                        if (rnd.Next(2) == 0) Moves[i] = RotateLeft;
+                        else Moves[i] = MoveForward;
+                    }
+                }
+            }   
+        }
+
+        public MovingObject crossover(MovingObject parent2)
+        {
+            List<Move> newMoves = new List<Move>();
+
+            List<Move> MaxMoves = new List<Move>();
+            int minmoves = 0;
+            int maxmoves = 0;
+
+            if (Moves.Count == parent2.Moves.Count)
+            {
+                minmoves = parent2.Moves.Count;
+                maxmoves = parent2.Moves.Count;
+            }
+            else if (Moves.Count > parent2.Moves.Count)
+            {
+                minmoves = parent2.Moves.Count;
+                maxmoves = Moves.Count;
+                MaxMoves = Moves;
+            }
+            else
+            {
+                minmoves = Moves.Count;
+                maxmoves = parent2.Moves.Count;
+                MaxMoves = parent2.Moves;
+            }
+
+
+            for (int i = 0; i < maxmoves; i++)
+            {
+                if (i < minmoves)
+                {
+                    if (rnd.Next(2) == 0) newMoves.Add(Moves[i]);
+                    else newMoves.Add(parent2.Moves[i]);
+                }
+                else
+                {
+                    if (rnd.Next(4) == 0)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        newMoves.Add(MaxMoves[i]);
+                    }
+                }
+            }
+
+            MovingObject children = new MovingObject(position, currentRotation, rnd, distance);
+            children.setMoves(newMoves);
+            children.fitness = 1;
+            return children;
+
         }
     }
 }

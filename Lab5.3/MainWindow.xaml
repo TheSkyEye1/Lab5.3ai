@@ -11,7 +11,11 @@
         <Button x:Name="StartB" Content="Start" HorizontalAlignment="Left" Height="50" Margin="580,120,0,0" VerticalAlignment="Top" Width="180" Click="StartB_Click"/>
         <Button x:Name="InitPopB" Content="Initialize Population" HorizontalAlignment="Left" Height="50" Margin="580,50,0,0" VerticalAlignment="Top" Width="180" Click="InitPopB_Click"/>
         <Label Content="Iteration:" HorizontalAlignment="Left" Height="36" Margin="580,190,0,0" VerticalAlignment="Top" Width="70"/>
-        <Label x:Name="itcounter" Content="0" HorizontalAlignment="Left" Height="36" Margin="660,190,0,0" VerticalAlignment="Top" Width="100"/>
+        <Label x:Name="itcounter" Content="0" HorizontalAlignment="Left" Height="36" Margin="680,190,0,0" VerticalAlignment="Top" Width="100"/>
+        <Label Content="Best Fitness:" HorizontalAlignment="Left" Height="36" Margin="580,240,0,0" VerticalAlignment="Top" Width="90"/>
+        <Label x:Name="bestFitness" Content="0" HorizontalAlignment="Left" Height="36" Margin="680,240,0,0" VerticalAlignment="Top" Width="100"/>
+        <Label Content="Simulation:" HorizontalAlignment="Left" Height="36" Margin="580,290,0,0" VerticalAlignment="Top" Width="90"/>
+        <Label x:Name="simCounter" Content="0" HorizontalAlignment="Left" Height="36" Margin="680,290,0,0" VerticalAlignment="Top" Width="100"/>
 
     </Grid>
 </Window>

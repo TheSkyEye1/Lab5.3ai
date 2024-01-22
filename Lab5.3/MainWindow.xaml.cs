@@ -21,11 +21,17 @@ namespace Lab5._3
     /// </summary>
     public partial class MainWindow : Window
     {
+        public const int mutationChance = 25;
+
         public List<MovingObject> Objects = new List<MovingObject>();
         public List<Point> Points = new List<Point>();
+        public List<CollectableObject> CObjects = new List<CollectableObject>();
 
         Random rnd;
 
+        int maxpopcount = 15;
+        int simCount = 10;
+        int curSim = 0;
         int pointCount = 5;
         int movingObjCount = 10;
         Point startPos = new Point(250,250);
@@ -43,7 +49,7 @@ namespace Lab5._3
             InitializeComponent();
             rnd = new Random();
             timer = new DispatcherTimer();
-            timer.Interval = new TimeSpan(0, 0, 0, 0, 100);
+            timer.Interval = new TimeSpan(0, 0, 0, 0, 1);
             timer.Tick += Timer_Tick;
         }
 
@@ -56,11 +62,23 @@ namespace Lab5._3
             }
         }
 
+        public void createCObjects()
+        {
+            int id;
+            if (CObjects.Count == 0) id = 0;
+            else id = CObjects[CObjects.Count-1].ID+1;
+            CObjects.Clear();
+            for (int i = id; i < pointCount+id; i++)
+            {
+                CObjects.Add(new CollectableObject(i, new Point(rnd.Next(9,491), rnd.Next(9, 491)), pointR));
+            }
+        }
+
         public void initPopulation()
         {
             for(int i = 0; i<movingObjCount; i++)
             {
-                Objects.Add(new MovingObject(startPos, startRotation, rnd));
+                Objects.Add(new MovingObject(startPos, startRotation, rnd, objR));
             }
         }
 
@@ -82,9 +100,9 @@ namespace Lab5._3
         public void DrawScene()
         {
             scene.Children.Clear();
-            foreach (Point p in Points)
+            foreach (CollectableObject p in CObjects)
             {
-                drawEllipse(p, pointR, 1);
+                drawEllipse(p.point, pointR, 1);
             }
             foreach (MovingObject obj in Objects)
             {
@@ -94,10 +112,9 @@ namespace Lab5._3
 
         private void StartB_Click(object sender, RoutedEventArgs e)
         {
-            CreatePoints();
+            createCObjects();
             DrawScene();
             timer.Start();
-            
         }
 
         private void InitPopB_Click(object sender, RoutedEventArgs e)
@@ -107,23 +124,120 @@ namespace Lab5._3
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            if(iteration < maxiterations)
+            simCounter.Content = curSim + 1;
+            if (iteration < maxiterations)
             {
-                itcounter.Content = iteration;
+                itcounter.Content = iteration+1;
                 foreach(MovingObject obj in Objects)
                 {
                     obj.Moves[obj.movecounter]();
                     obj.movecounter++;
                     if (obj.movecounter == obj.Moves.Count) obj.movecounter = 0;
+
+                    foreach(CollectableObject cobj in CObjects)
+                    {
+                        if(!obj.collectedPoints.Contains(cobj.ID)) 
+                            if(intersection(obj,cobj)) 
+                                obj.collectedPoints.Add(cobj.ID);
+                    }
                 }
+
+                if(iteration % 100 == 0)
+                {
+                    createCObjects();
+                }
+
+
+
                 DrawScene();
                 iteration++;
             }
             else
             {
-                iteration = 0;
-                timer.Stop();
+                curSim++;
+                if(curSim < simCount)
+                {
+                    StartNewSimulation();
+                }
+                else
+                {
+                    timer.Stop();
+                }
             }
         }
+
+        private bool intersection(MovingObject obj, CollectableObject cobj)
+        {
+            double distanceBetweenCenters = Math.Sqrt(Math.Pow(cobj.point.X - obj.position.X, 2) + Math.Pow(cobj.point.Y - obj.position.Y, 2));
+
+            
+            return distanceBetweenCenters <= pointR + objR;
+        }
+
+        private int CalculateFitness()
+        {
+            List<int> fitneses = new List<int>();
+            foreach(MovingObject obj in Objects)
+            {
+                int fit = 0;
+                foreach(int id in  obj.collectedPoints)
+                {
+                    fit += 100;
+                }
+
+                obj.fitness = fit;
+                obj.collectedPoints = new List<int>();
+                fitneses.Add(fit);
+            }
+
+            Objects.Sort((x, y) => x.fitness.CompareTo(y.fitness));
+
+            return fitneses.Max();
+        }
+
+        private void createNewPop()
+        {
+            int n = Objects.Count;
+            for (int i = 1; i< n; i++)
+            {
+                if (Objects[i].fitness > 0)
+                {
+                    Objects.Add(Objects[0].crossover(Objects[i]));
+                }
+            }
+
+            foreach(MovingObject obj in Objects)
+            {
+                if(rnd.Next(100)>mutationChance)
+                {
+                    obj.Mutate();
+                }
+                obj.position = startPos;
+                obj.movecounter = 0;
+            }
+
+            Objects.Sort((x, y) => x.fitness.CompareTo(y.fitness));
+
+            if (Objects.Count > maxpopcount)
+            {
+                for (int i = Objects.Count-1; i > maxpopcount-1; i--)
+                {
+                    Objects.Remove(Objects[i]);
+                }
+            }
+
+        }
+        
+        private void StartNewSimulation()
+        {
+            CObjects.Clear();
+            bestFitness.Content = CalculateFitness();
+            iteration = 0;
+            createNewPop();
+            createCObjects();
+            DrawScene();
+        }
+
+
     }
 }

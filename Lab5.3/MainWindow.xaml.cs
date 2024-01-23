@@ -29,6 +29,9 @@ namespace Lab5._3
 
         Random rnd;
 
+        bool selectedMode = false;
+
+        int MaxLifeTime = 5;
         int maxpopcount = 15;
         int simCount = 10;
         int curSim = 0;
@@ -39,10 +42,12 @@ namespace Lab5._3
 
         int pointR = 10;
         int objR = 15;
-
+        int iterationsToReroll = 100;
         int iteration = 0;
         int maxiterations = 1000;
         DispatcherTimer timer;
+        public int NameIndex = 0;
+
 
         public MainWindow()
         {
@@ -78,16 +83,29 @@ namespace Lab5._3
         {
             for(int i = 0; i<movingObjCount; i++)
             {
-                Objects.Add(new MovingObject(startPos, startRotation, rnd, objR));
+                Objects.Add(new MovingObject(startPos, startRotation, rnd, objR, MaxLifeTime, NameIndex.ToString()));
+                NameIndex++;
             }
         }
+
+        public void loadFromForm()
+        {
+            maxpopcount = int.Parse(MaxPopTB.Text);
+            simCount = int.Parse(SimulationsTB.Text);
+            pointCount = int.Parse(ColectablesTB.Text);
+            movingObjCount = int.Parse(StartPopTB.Text);
+            maxiterations = int.Parse(IterationsTB.Text);
+            iterationsToReroll = int.Parse(IterationsRerollTB.Text);
+        }
+
 
         public void drawEllipse(Point p, double r, int type)
         {
             Ellipse el = new Ellipse();
             SolidColorBrush cb = new SolidColorBrush();
             if (type == 0) cb.Color = Color.FromArgb(255, 0, 0, 0);
-            else cb.Color = Color.FromArgb(0, 255, 0, 0);
+            else if (type == 1) cb.Color = Color.FromArgb(255, 0, 255, 0);
+            else cb.Color = Color.FromArgb(255, 255, 0, 0);
             el.Fill = cb;
             el.StrokeThickness = 1;
             el.Stroke = Brushes.Black;
@@ -100,21 +118,68 @@ namespace Lab5._3
         public void DrawScene()
         {
             scene.Children.Clear();
-            foreach (CollectableObject p in CObjects)
+            for(int i = 0; i<Objects.Count; i++)
             {
-                drawEllipse(p.point, pointR, 1);
+                if (i == 0) drawEllipse(Objects[i].position, objR, 2);
+                else drawEllipse(Objects[i].position, objR, 1);
             }
+            foreach (CollectableObject obj in CObjects)
+            {
+                drawEllipse(obj.point, pointR, 0);
+            }
+        }
+
+        List<Line> Lines = new List<Line>();
+        public void CreateLine(Point a, Point b)
+        {
+            Line line = new Line();
+            line.X1 = a.X;
+            line.Y1 = a.Y;
+            line.X2 = b.X;
+            line.Y2 = b.Y;
+            line.Stroke = Brushes.Red;
+            line.StrokeThickness = 2;
+
+            if (Math.Sqrt(Math.Pow(b.X - a.X, 2) + Math.Pow(b.Y - a.Y, 2)) < 50)
+            {
+                Lines.Add(line);
+            }
+        }
+
+        public void DrawLines()
+        {
+            foreach(Line line in Lines)
+            {
+                scene.Children.Add(line);
+            }
+        }
+
+        private void LoadListBox()
+        {
+            ObjectsList.SelectedItem = -1;
+            ObjectsList.Items.Clear();
             foreach (MovingObject obj in Objects)
             {
-                drawEllipse(obj.position, objR, 0);
+                ObjectsList.Items.Add(obj.name.ToString());
             }
         }
 
         private void StartB_Click(object sender, RoutedEventArgs e)
         {
-            createCObjects();
-            DrawScene();
-            timer.Start();
+            if (curSim == 0)
+            {
+                loadFromForm();
+                createCObjects();
+                DrawScene();
+                LoadListBox();
+                timer.Start();
+
+            }
+            else if(curSim < simCount)
+            {
+                StartNewSimulation();
+            }
+
         }
 
         private void InitPopB_Click(object sender, RoutedEventArgs e)
@@ -124,45 +189,60 @@ namespace Lab5._3
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            simCounter.Content = curSim + 1;
-            if (iteration < maxiterations)
+            if (selectedMode == false)
             {
-                itcounter.Content = iteration+1;
-                foreach(MovingObject obj in Objects)
+                curPop_counter.Content = Objects.Count;
+                simCounter.Content = curSim + 1;
+                if (iteration < maxiterations)
                 {
-                    obj.Moves[obj.movecounter]();
-                    obj.movecounter++;
-                    if (obj.movecounter == obj.Moves.Count) obj.movecounter = 0;
-
-                    foreach(CollectableObject cobj in CObjects)
+                    itcounter.Content = iteration + 1;
+                    foreach (MovingObject obj in Objects)
                     {
-                        if(!obj.collectedPoints.Contains(cobj.ID)) 
-                            if(intersection(obj,cobj)) 
-                                obj.collectedPoints.Add(cobj.ID);
+                        obj.Moves[obj.movecounter]();
+                        obj.movecounter++;
+                        if (obj.movecounter == obj.Moves.Count) obj.movecounter = 0;
+
+                        foreach (CollectableObject cobj in CObjects)
+                        {
+                            if (!obj.collectedPoints.Contains(cobj.ID))
+                                if (intersection(obj, cobj))
+                                    obj.collectedPoints.Add(cobj.ID);
+                        }
                     }
-                }
 
-                if(iteration % 100 == 0)
-                {
-                    createCObjects();
-                }
+                    //if(iteration % iterationsToReroll == 0)
+                    //{
+                    //    
+                    //}
 
-
-
-                DrawScene();
-                iteration++;
-            }
-            else
-            {
-                curSim++;
-                if(curSim < simCount)
-                {
-                    StartNewSimulation();
+                    DrawScene();
+                    iteration++;
                 }
                 else
                 {
+                    bestFitness.Content = CalculateFitness();
+                    iteration = 0;
+                    LoadListBox();
+                    curSim++;
                     timer.Stop();
                 }
+            }
+            else
+            {
+                scene.Children.Clear();
+
+                Point a = Objects[ObjectsList.SelectedIndex].position;
+
+                drawEllipse(Objects[ObjectsList.SelectedIndex].position, objR, 2);
+                Objects[ObjectsList.SelectedIndex].Moves[Objects[ObjectsList.SelectedIndex].movecounter]();
+                Objects[ObjectsList.SelectedIndex].movecounter++;
+
+                Point b = Objects[ObjectsList.SelectedIndex].position;
+                CreateLine(a, b);
+                DrawLines();
+
+                if (Objects[ObjectsList.SelectedIndex].movecounter == Objects[ObjectsList.SelectedIndex].Moves.Count) Objects[ObjectsList.SelectedIndex].movecounter = 0;
+
             }
         }
 
@@ -190,8 +270,7 @@ namespace Lab5._3
                 fitneses.Add(fit);
             }
 
-            Objects.Sort((x, y) => x.fitness.CompareTo(y.fitness));
-
+            Objects.Sort((x, y) => y.fitness.CompareTo(x.fitness));
             return fitneses.Max();
         }
 
@@ -216,7 +295,16 @@ namespace Lab5._3
                 obj.movecounter = 0;
             }
 
-            Objects.Sort((x, y) => x.fitness.CompareTo(y.fitness));
+            Objects.Sort((x, y) => y.fitness.CompareTo(x.fitness));
+
+            for(int i = 0; i<Objects.Count; i++)
+            {
+                if (Objects[i].lifeTime == Objects[i].lifeSpan)
+                {
+                    Objects.Remove(Objects[i]);
+                }
+            }
+
 
             if (Objects.Count > maxpopcount)
             {
@@ -225,19 +313,59 @@ namespace Lab5._3
                     Objects.Remove(Objects[i]);
                 }
             }
+            else
+            {
+                for (int i = Objects.Count - 1; i < maxpopcount; i++)
+                {
+                    Objects.Add(new MovingObject(startPos, startRotation, rnd, objR, MaxLifeTime, NameIndex.ToString()));
+                    NameIndex++;
+                }
+            }
 
         }
         
         private void StartNewSimulation()
         {
+            foreach(MovingObject obj in Objects)
+            {
+                obj.lifeTime++;
+            }
             CObjects.Clear();
-            bestFitness.Content = CalculateFitness();
-            iteration = 0;
             createNewPop();
             createCObjects();
+            LoadListBox();
             DrawScene();
+            timer.Start();
         }
 
+        private void StartLocalB_Click(object sender, RoutedEventArgs e)
+        {
+            if (ObjectsList.SelectedItems.Count != -1 && selectedMode == false)
+            {
+                Objects[ObjectsList.SelectedIndex].position = startPos;
+                Objects[ObjectsList.SelectedIndex].currentRotation = 0;
+                Lines.Clear();
+                StartLocalB.Content = "Stop Local";
+                selectedMode = true;
+                timer.Start();
+            }
+            else
+            {
+                StartLocalB.Content = "Start Local";
+                selectedMode = false;
+                timer.Stop();
+            }
+        }
 
+        private void ObjectsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if(ObjectsList.SelectedItems.Count > 0)
+            {
+                MovesCountLB.Content = Objects[ObjectsList.SelectedIndex].Moves.Count;
+                AgeLB.Content = Objects[ObjectsList.SelectedIndex].lifeTime + 1;
+                LifeSpanLB.Content = Objects[ObjectsList.SelectedIndex].lifeSpan + 1;
+                FitnessLB.Content = Objects[ObjectsList.SelectedIndex].fitness;
+            }
+        }
     }
 }

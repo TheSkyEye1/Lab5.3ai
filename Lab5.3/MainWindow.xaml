@@ -5,17 +5,46 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Lab5._3"
         mc:Ignorable="d"
-        Title="MainWindow" Height="700" Width="800">
+        Title="MainWindow" Height="750" Width="942">
     <Grid>
+        <Rectangle HorizontalAlignment="Left" Height="210" Margin="573,391,0,0" Stroke="Black" VerticalAlignment="Top" Width="332"/>
+        <Rectangle HorizontalAlignment="Left" Height="92" Margin="50,554,0,0" Stroke="Black" VerticalAlignment="Top" Width="544" Fill="White"/>
+        <Rectangle HorizontalAlignment="Left" Height="339" Margin="571,46,0,0" Stroke="Black" VerticalAlignment="Top" Width="196"/>
         <Canvas x:Name="scene" HorizontalAlignment="Left" Height="500" Margin="50,50,0,0" VerticalAlignment="Top" Width="500" Background="#FFF0F0F0"/>
-        <Button x:Name="StartB" Content="Start" HorizontalAlignment="Left" Height="50" Margin="580,120,0,0" VerticalAlignment="Top" Width="180" Click="StartB_Click"/>
-        <Button x:Name="InitPopB" Content="Initialize Population" HorizontalAlignment="Left" Height="50" Margin="580,50,0,0" VerticalAlignment="Top" Width="180" Click="InitPopB_Click"/>
+        <Button x:Name="StartB" Content="Start" HorizontalAlignment="Left" Height="50" Margin="580,116,0,0" VerticalAlignment="Top" Width="180" Click="StartB_Click"/>
+        <Button x:Name="InitPopB" Content="Initialize Population" HorizontalAlignment="Left" Height="50" Margin="580,55,0,0" VerticalAlignment="Top" Width="180" Click="InitPopB_Click"/>
         <Label Content="Iteration:" HorizontalAlignment="Left" Height="36" Margin="580,190,0,0" VerticalAlignment="Top" Width="70"/>
         <Label x:Name="itcounter" Content="0" HorizontalAlignment="Left" Height="36" Margin="680,190,0,0" VerticalAlignment="Top" Width="100"/>
         <Label Content="Best Fitness:" HorizontalAlignment="Left" Height="36" Margin="580,240,0,0" VerticalAlignment="Top" Width="90"/>
         <Label x:Name="bestFitness" Content="0" HorizontalAlignment="Left" Height="36" Margin="680,240,0,0" VerticalAlignment="Top" Width="100"/>
         <Label Content="Simulation:" HorizontalAlignment="Left" Height="36" Margin="580,290,0,0" VerticalAlignment="Top" Width="90"/>
         <Label x:Name="simCounter" Content="0" HorizontalAlignment="Left" Height="36" Margin="680,290,0,0" VerticalAlignment="Top" Width="100"/>
+        <Label Content="Max Population:" HorizontalAlignment="Left" Height="36" Margin="50,560,0,0" VerticalAlignment="Top" Width="100"/>
+        <TextBox x:Name="MaxPopTB" HorizontalAlignment="Left" Height="36" Margin="150,560,0,0" TextWrapping="Wrap" Text="15" VerticalAlignment="Top" Width="50" TextAlignment="Center"/>
+        <Label Content="Start Population:" HorizontalAlignment="Left" Height="36" Margin="50,600,0,0" VerticalAlignment="Top" Width="100"/>
+        <TextBox x:Name="StartPopTB" HorizontalAlignment="Left" Height="36" Margin="150,600,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="50" TextAlignment="Center"/>
+        <Label Content="Collectables amount:" HorizontalAlignment="Left" Height="36" Margin="220,560,0,0" VerticalAlignment="Top" Width="123"/>
+        <TextBox x:Name="ColectablesTB" HorizontalAlignment="Left" Height="36" Margin="345,560,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="50" TextAlignment="Center"/>
+        <Label Content="Iterations to Reroll:" HorizontalAlignment="Left" Height="36" Margin="220,600,0,0" VerticalAlignment="Top" Width="123"/>
+        <TextBox x:Name="IterationsRerollTB" HorizontalAlignment="Left" Height="36" Margin="345,600,0,0" TextWrapping="Wrap" Text="100" VerticalAlignment="Top" Width="50" TextAlignment="Center"/>
+        <Label Content="Iterations:" HorizontalAlignment="Left" Height="36" Margin="410,560,0,0" VerticalAlignment="Top" Width="122"/>
+        <TextBox x:Name="IterationsTB" HorizontalAlignment="Left" Height="36" Margin="540,560,0,0" TextWrapping="Wrap" Text="1000" VerticalAlignment="Top" Width="50" TextAlignment="Center"/>
+        <Label Content="Simulations:" HorizontalAlignment="Left" Height="36" Margin="410,600,0,0" VerticalAlignment="Top" Width="122"/>
+        <TextBox x:Name="SimulationsTB" HorizontalAlignment="Left" Height="36" Margin="540,600,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="50" TextAlignment="Center"/>
+        <Label Content="Cur Pop:" HorizontalAlignment="Left" Height="36" Margin="580,340,0,0" VerticalAlignment="Top" Width="90"/>
+        <Label x:Name="curPop_counter" Content="0" HorizontalAlignment="Left" Height="36" Margin="680,340,0,0" VerticalAlignment="Top" Width="100"/>
+        <ListBox x:Name="ObjectsList" HorizontalAlignment="Left" Height="137" Margin="576,395,0,0" VerticalAlignment="Top" Width="133" d:ItemsSource="{d:SampleData ItemCount=5}" SelectionChanged="ObjectsList_SelectionChanged"/>
+        <Button x:Name="StartLocalB" Content="Start Local" HorizontalAlignment="Left" Height="50" Margin="718,396,0,0" VerticalAlignment="Top" Width="180" Click="StartLocalB_Click"/>
+        <Label Content="Moves:" HorizontalAlignment="Left" Height="36" Margin="720,456,0,0" VerticalAlignment="Top" Width="92"/>
+        <Label x:Name="MovesCountLB" Content="0" HorizontalAlignment="Left" Height="36" Margin="800,456,0,0" VerticalAlignment="Top" Width="92"/>
+        <Label Content="Age:" HorizontalAlignment="Left" Height="36" Margin="720,486,0,0" VerticalAlignment="Top" Width="92"/>
+        <Label x:Name="AgeLB" Content="0" HorizontalAlignment="Left" Height="36" Margin="800,486,0,0" VerticalAlignment="Top" Width="92"/>
+        <Label Content="Life Time:" HorizontalAlignment="Left" Height="36" Margin="720,516,0,0" VerticalAlignment="Top" Width="92"/>
+        <Label x:Name="LifeSpanLB" Content="0" HorizontalAlignment="Left" Height="36" Margin="800,516,0,0" VerticalAlignment="Top" Width="92"/>
+        <Label Content="Fitness:" HorizontalAlignment="Left" Height="36" Margin="720,546,0,0" VerticalAlignment="Top" Width="92"/>
+        <Label x:Name="FitnessLB" Content="0" HorizontalAlignment="Left" Height="36" Margin="800,546,0,0" VerticalAlignment="Top" Width="92"/>
+        
+
 
     </Grid>
 </Window>

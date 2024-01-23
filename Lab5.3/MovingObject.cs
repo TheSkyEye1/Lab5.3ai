@@ -11,16 +11,15 @@ namespace Lab5._3
     public class MovingObject
     {
         Random rnd;
-
-        public const int mutationChance = 75;
-
         public Point position;
         public double currentRotation;
         public int fitness = 0;
         public int movecounter = 0;
+        public string name;
 
         int distance;
-
+        public int lifeTime = 0;
+        public int lifeSpan;
         public List<Move> Moves = new List<Move>();
         public List<int> collectedPoints = new List<int>();
 
@@ -32,10 +31,10 @@ namespace Lab5._3
         {
             double x = position.X + distance * Math.Cos(currentRotation);
             double y = position.Y + distance * Math.Sin(currentRotation);
-            if (x > 500) x = 484;
-            if (x < 0) x = 14;
-            if (y > 500) y = 484;
-            if (y < 0) y = 14;
+            if (x > 500) x = x - 500;
+            if (x < 0) x = 500 + x;
+            if (y > 500) y = y - 500;
+            if (y < 0) y = 500 + y;
 
             position = new Point(x, y);
         }
@@ -88,13 +87,15 @@ namespace Lab5._3
             this.currentRotation = curRot;
         }
 
-        public MovingObject(Point position, double currentRotation, Random rnd, int distance)
+        public MovingObject(Point position, double currentRotation, Random rnd, int distance, int lifeSpan, string name)
         {
             this.rnd = rnd;
             this.position = position;
             this.currentRotation = 0;
             this.Moves = CreateGenes();
             this.distance = distance;
+            this.lifeSpan = rnd.Next(1,lifeSpan);
+            this.name = name;
             
         }
 
@@ -102,7 +103,7 @@ namespace Lab5._3
         {
             for(int i = 0; i<Moves.Count;i++)
             {
-                if(rnd.Next(100) > mutationChance)
+                if(rnd.Next(100) > MainWindow.mutationChance)
                 {
                     if (Moves[i] == MoveForward)
                     {
@@ -170,9 +171,8 @@ namespace Lab5._3
                 }
             }
 
-            MovingObject children = new MovingObject(position, currentRotation, rnd, distance);
+            MovingObject children = new MovingObject(new Point(250,250), 0, rnd, distance, this.lifeSpan, "child" + name + "_" + parent2.name);
             children.setMoves(newMoves);
-            children.fitness = 1;
             return children;
 
         }

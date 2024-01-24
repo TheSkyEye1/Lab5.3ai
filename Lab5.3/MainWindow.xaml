@@ -43,7 +43,8 @@
         <Label x:Name="LifeSpanLB" Content="0" HorizontalAlignment="Left" Height="36" Margin="800,516,0,0" VerticalAlignment="Top" Width="92"/>
         <Label Content="Fitness:" HorizontalAlignment="Left" Height="36" Margin="720,546,0,0" VerticalAlignment="Top" Width="92"/>
         <Label x:Name="FitnessLB" Content="0" HorizontalAlignment="Left" Height="36" Margin="800,546,0,0" VerticalAlignment="Top" Width="92"/>
-        
+        <CheckBox x:Name="ckbx" Content="Autostart" HorizontalAlignment="Left" Margin="774,74,0,0" VerticalAlignment="Top"/>
+
 
 
     </Grid>

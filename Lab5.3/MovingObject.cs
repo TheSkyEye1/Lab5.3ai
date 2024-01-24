@@ -20,11 +20,14 @@ namespace Lab5._3
         int distance;
         public int lifeTime = 0;
         public int lifeSpan;
-        public List<Move> Moves = new List<Move>();
+        //public List<Move> Moves = new List<Move>();
         public List<int> collectedPoints = new List<int>();
 
 
-        public delegate void Move();
+        public List<string> Moves = new List<string>();
+
+
+        //public delegate void Move();
 
         
         public void MoveForward()
@@ -50,9 +53,9 @@ namespace Lab5._3
             if (currentRotation == 315) currentRotation = 0;
             else currentRotation += 45;
         }
-        public List<Move> CreateGenes()
+        public void CreateGenes()
         {
-            List<Move> movlist = new List<Move>();
+            Moves = new List<string>();
             int movescount = rnd.Next(25, 100);
             for(int i = 0; i<movescount; i++)
             {
@@ -60,23 +63,22 @@ namespace Lab5._3
                 switch(m)
                 {
                     case 0:
-                        Move moveforward = MoveForward;
-                        movlist.Add(moveforward);
+                        //Move moveforward = MoveForward;
+                        //movlist.Add(moveforward);
+                        Moves.Add("F");
                         break;
                     case 1:
-                        Move moveleft = RotateLeft;
-                        movlist.Add(moveleft);
+                        Moves.Add("L");
                         break;
                     case 2:
-                        Move moveright = RotateRight;
-                        movlist.Add(moveright);
+                        Moves.Add("R");
                         break;
                 }
             }
-            return movlist;
+            //return movlist;
         }
 
-        public void setMoves(List<Move> movlist)
+        public void setMoves(List<string> movlist)
         {
             this.Moves = movlist;
         }
@@ -92,7 +94,7 @@ namespace Lab5._3
             this.rnd = rnd;
             this.position = position;
             this.currentRotation = 0;
-            this.Moves = CreateGenes();
+            CreateGenes();
             this.distance = distance;
             this.lifeSpan = rnd.Next(1,lifeSpan);
             this.name = name;
@@ -105,20 +107,20 @@ namespace Lab5._3
             {
                 if(rnd.Next(100) > MainWindow.mutationChance)
                 {
-                    if (Moves[i] == MoveForward)
+                    int m = rnd.Next(3);
+                    switch (m)
                     {
-                        if (rnd.Next(2) == 0) Moves[i] = RotateLeft;
-                        else Moves[i] = RotateRight;
-                    }
-                    else if (Moves[i] == RotateLeft)
-                    {
-                        if (rnd.Next(2) == 0) Moves[i] = MoveForward;
-                        else Moves[i] = RotateRight;
-                    }
-                    else
-                    {
-                        if (rnd.Next(2) == 0) Moves[i] = RotateLeft;
-                        else Moves[i] = MoveForward;
+                        case 0:
+                            //Move moveforward = MoveForward;
+                            //movlist.Add(moveforward);
+                            Moves[i] = "F";
+                            break;
+                        case 1:
+                            Moves[i] = "L";
+                            break;
+                        case 2:
+                            Moves[i] = "R";
+                            break;
                     }
                 }
             }   
@@ -126,9 +128,9 @@ namespace Lab5._3
 
         public MovingObject crossover(MovingObject parent2)
         {
-            List<Move> newMoves = new List<Move>();
+            List<string> newMoves = new List<string>();
 
-            List<Move> MaxMoves = new List<Move>();
+            List<string> MaxMoves = new List<string>();
             int minmoves = 0;
             int maxmoves = 0;
 
@@ -141,13 +143,13 @@ namespace Lab5._3
             {
                 minmoves = parent2.Moves.Count;
                 maxmoves = Moves.Count;
-                MaxMoves = Moves;
+                MaxMoves.AddRange(Moves);
             }
             else
             {
                 minmoves = Moves.Count;
                 maxmoves = parent2.Moves.Count;
-                MaxMoves = parent2.Moves;
+                MaxMoves.AddRange(parent2.Moves);
             }
 
 
@@ -171,7 +173,7 @@ namespace Lab5._3
                 }
             }
 
-            MovingObject children = new MovingObject(new Point(250,250), 0, rnd, distance, this.lifeSpan, "child" + name + "_" + parent2.name);
+            MovingObject children = new MovingObject(new Point(250,250), 0, rnd, distance, rnd.Next(1,lifeSpan), "child of " + name + " & " + parent2.name);
             children.setMoves(newMoves);
             return children;
 

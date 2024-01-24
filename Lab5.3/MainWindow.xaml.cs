@@ -31,7 +31,7 @@ namespace Lab5._3
 
         bool selectedMode = false;
 
-        int MaxLifeTime = 5;
+        int MaxLifeTime = 4;
         int maxpopcount = 15;
         int simCount = 10;
         int curSim = 0;
@@ -40,8 +40,8 @@ namespace Lab5._3
         Point startPos = new Point(250,250);
         int startRotation = 0;
 
-        int pointR = 10;
-        int objR = 15;
+        int pointR = 30;
+        int objR = 40;
         int iterationsToReroll = 100;
         int iteration = 0;
         int maxiterations = 1000;
@@ -189,7 +189,7 @@ namespace Lab5._3
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            if (selectedMode == false)
+            if (selectedMode == false && curSim != simCount)
             {
                 curPop_counter.Content = Objects.Count;
                 simCounter.Content = curSim + 1;
@@ -198,7 +198,12 @@ namespace Lab5._3
                     itcounter.Content = iteration + 1;
                     foreach (MovingObject obj in Objects)
                     {
-                        obj.Moves[obj.movecounter]();
+                        switch(obj.Moves[obj.movecounter])
+                        {
+                            case ("F"): { obj.MoveForward(); break; }
+                            case ("L"): { obj.RotateLeft(); break; }
+                            case ("R"): { obj.RotateRight(); break; }
+                        }
                         obj.movecounter++;
                         if (obj.movecounter == obj.Moves.Count) obj.movecounter = 0;
 
@@ -218,6 +223,21 @@ namespace Lab5._3
                     DrawScene();
                     iteration++;
                 }
+
+                else if(ckbx.IsChecked == true)
+                {
+                    timer.Stop();
+                    bestFitness.Content = CalculateFitness();
+                    iteration = 0;
+                    LoadListBox();
+                    curSim++;
+                    
+                    if (curSim != simCount)
+                    {
+                        StartNewSimulation();
+                    } 
+
+                }
                 else
                 {
                     bestFitness.Content = CalculateFitness();
@@ -231,17 +251,26 @@ namespace Lab5._3
             {
                 scene.Children.Clear();
 
-                Point a = Objects[ObjectsList.SelectedIndex].position;
+                MovingObject obj = Objects[ObjectsList.SelectedIndex];
 
-                drawEllipse(Objects[ObjectsList.SelectedIndex].position, objR, 2);
-                Objects[ObjectsList.SelectedIndex].Moves[Objects[ObjectsList.SelectedIndex].movecounter]();
-                Objects[ObjectsList.SelectedIndex].movecounter++;
+                Point a = obj.position;
 
-                Point b = Objects[ObjectsList.SelectedIndex].position;
+                drawEllipse(obj.position, objR, 2);
+
+                switch (obj.Moves[obj.movecounter])
+                {
+                    case ("F"): { obj.MoveForward(); break; }
+                    case ("L"): { obj.RotateLeft(); break; }
+                    case ("R"): { obj.RotateRight(); break; }
+                }
+
+                obj.movecounter++;
+
+                Point b = obj.position;
                 CreateLine(a, b);
                 DrawLines();
 
-                if (Objects[ObjectsList.SelectedIndex].movecounter == Objects[ObjectsList.SelectedIndex].Moves.Count) Objects[ObjectsList.SelectedIndex].movecounter = 0;
+                if (obj.movecounter == obj.Moves.Count) obj.movecounter = 0;
 
             }
         }
@@ -277,13 +306,48 @@ namespace Lab5._3
         private void createNewPop()
         {
             int n = Objects.Count;
-            for (int i = 1; i< n; i++)
+
+            //for (int i = 1; i< n; i++)
+            //{
+            //    if (Objects[i].fitness > 0)
+            //    {
+            //        Objects.Add(Objects[0].crossover(Objects[i]));
+            //    }
+            //}
+            List<MovingObject> parents = new List<MovingObject>();
+
+            for(int i = 0; i<n/2+2; i++)
             {
-                if (Objects[i].fitness > 0)
+                int j = rnd.Next(n);
+                if (parents.Contains(Objects[j]))
                 {
-                    Objects.Add(Objects[0].crossover(Objects[i]));
+                    i--;
+                }
+                else
+                {
+                    parents.Add(Objects[j]);
                 }
             }
+
+            while(parents.Count>1)
+            {
+                int index1 = rnd.Next(parents.Count);
+                int index2 = index1;
+
+                while(index1 == index2)
+                {
+                    index2 = rnd.Next(parents.Count);
+                }
+
+                MovingObject parent1 = parents[index1];
+                MovingObject parent2 = parents[index2];
+
+                Objects.Add(parent1.crossover(parent2));
+
+                parents.Remove(parent1);
+                parents.Remove(parent2);
+            }
+
 
             foreach(MovingObject obj in Objects)
             {
@@ -299,29 +363,11 @@ namespace Lab5._3
 
             for(int i = 0; i<Objects.Count; i++)
             {
-                if (Objects[i].lifeTime == Objects[i].lifeSpan)
+                if (Objects[i].lifeTime >= Objects[i].lifeSpan)
                 {
                     Objects.Remove(Objects[i]);
                 }
             }
-
-
-            if (Objects.Count > maxpopcount)
-            {
-                for (int i = Objects.Count-1; i > maxpopcount-1; i--)
-                {
-                    Objects.Remove(Objects[i]);
-                }
-            }
-            else
-            {
-                for (int i = Objects.Count - 1; i < maxpopcount; i++)
-                {
-                    Objects.Add(new MovingObject(startPos, startRotation, rnd, objR, MaxLifeTime, NameIndex.ToString()));
-                    NameIndex++;
-                }
-            }
-
         }
         
         private void StartNewSimulation()
